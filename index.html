@@ -1,0 +1,306 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>GOTA Voyages Manager</title>
+<style>
+:root{--n:#0b1f3f;--g:#c9a227;--bg:#f4f2ee}*{box-sizing:border-box}
+body{margin:0;font:15px system-ui,sans-serif;background:var(--bg);color:#1b2433}
+header{background:var(--n);color:#fff;padding:10px 14px;display:flex;align-items:center;gap:10px}
+header b{color:var(--g);font-size:18px}header small{opacity:.7}
+nav{display:flex;overflow-x:auto;background:var(--n);position:sticky;top:0;z-index:4}
+nav a{color:#cfd8e8;padding:11px 14px;white-space:nowrap;cursor:pointer}nav a.on{color:var(--g);border-bottom:3px solid var(--g)}
+nav.sub{background:#13305c}main{padding:14px;max-width:1000px;margin:auto}
+.card{background:#fff;border-radius:10px;padding:14px;margin-bottom:12px;box-shadow:0 1px 3px #0002}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.k{font-size:12px;color:#667}.v{font-size:20px;font-weight:700;color:var(--n)}
+label{display:block;font-size:12px;color:#556;margin:6px 0 2px}
+input,select,textarea{width:100%;padding:9px;border:1px solid #ccd;border-radius:6px;font:inherit}input[type=checkbox]{width:auto}
+button{background:var(--n);color:#fff;border:0;padding:9px 14px;border-radius:6px;cursor:pointer;font:inherit;margin:2px}
+button.g{background:var(--g);color:#000}button.r{background:#a33}button.s{padding:4px 9px;font-size:12px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:end}.row>div{flex:1;min-width:120px}
+.warn{background:#fff4d6;border-left:4px solid var(--g);padding:8px;margin:6px 0;font-size:13px}
+.err{background:#fde8e8;border-left:4px solid #a33;padding:8px;margin:6px 0;font-size:13px}
+table{width:100%;border-collapse:collapse}td,th{padding:6px;border-bottom:1px solid #eee;text-align:left;font-size:13px}
+.tag{background:#e8edf7;border-radius:10px;padding:2px 8px;font-size:12px}.tot{color:var(--g);font-weight:700;font-size:22px}
+.doc{background:#fff;padding:22px;border:1px solid #ddd;margin-bottom:14px}.doc h1{color:var(--n);margin:0}.doc hr{border:0;border-top:3px solid var(--g)}
+pre{white-space:pre-wrap;background:#eef3f0;padding:12px;border-radius:8px}
+@media print{header,nav,.np{display:none!important}body{background:#fff}main{padding:0}.doc{border:0;padding:0;page-break-after:always}}
+</style></head><body>
+<header><svg width="30" height="30" viewBox="0 0 30 30"><circle cx="15" cy="15" r="13" fill="none" stroke="#c9a227" stroke-width="2"/><path d="M8 20l7-12 7 12z" fill="#c9a227"/></svg><div><b>GOTA Voyages</b> <small>Expert through Experience</small></div></header>
+<nav id="nav"></nav><nav class="sub" id="sub"></nav><main id="app"></main>
+<script>
+const K='gota_v2',U=864e5,$=s=>document.querySelector(s);
+const pz=s=>s.trim().split('\n').map(l=>l.split('|'));
+const HS=`BJ|Benin Royal|Room 1|65000|0
+BJ|Azalaï Hotel Cotonou|Standard Room|70000|15000
+BJ|Azalaï Hotel Cotonou|Comfort / Superior|115000|15000
+BJ|Azalaï Hotel Cotonou|Standard Terrace / Balcony|152000|15000
+BJ|Azalaï Hotel Cotonou|Junior Suite|215000|15000
+BJ|Azalaï Hotel Cotonou|Prestige Suite Jacuzzi|220000|15000
+BJ|Azalaï Hotel Cotonou|Opera Suite|315000|15000
+BJ|Casa Del Papa|Privilège Double Sea View|160000|0
+BJ|Casa Del Papa|Privilège Single Sea View|157500|0
+BJ|Casa Del Papa|Superior Pool Double Sea View|105500|0
+BJ|Casa Del Papa|Superior Pool Single Sea View|104000|0
+BJ|Casa Del Papa|Standard Double Sea View|86000|0
+BJ|Casa Del Papa|Standard Single Sea View|84500|0
+BJ|Casa Del Papa|Standard Double Lagoon View|74000|0
+BJ|Casa Del Papa|Standard Single Lagoon View|72500|0
+BJ|Amazon Hotel / Katijak Beach|Room 1|40000|4000
+BJ|Amazon Hotel / Katijak Beach|Room 2|50000|4000
+BJ|Amazon Hotel / Katijak Beach|Room 3|54000|4000
+BJ|Hotel Galilée|Room 1|30000|4500
+BJ|Hotel Galilée|Room 2|40000|4500
+BJ|Hotel Galilée|Room 3|49000|4500
+BJ|Mimi Apartments Fidjrossè|2 bedrooms|50000|0
+BJ|Mimi Apartments Jericho|2 rooms|65000|0
+BJ|Mimi Apartments PK3|Apartment|78000|0
+TG|Miadjoe Beach Resort|Room 1|60000|0
+TG|Alize Plage|Room 1|40000|0
+TG|Alize Plage|Room 2|50000|0
+TG|Alize Plage|Room 3|54000|0
+TG|Onomo Hotel|Room 1|80000|13000
+TG|Onomo Hotel|Room 2|100000|13000
+TG|Blue Turtle|Weekday rate|95000|10000
+TG|Blue Turtle|Weekend rate|115000|10000
+TG|Petit Brussel|Room 1|80000|9500
+TG|Petit Brussel|Room 2|90000|9500
+NG|Albergo|Room 1|190000|25000
+NG|Albergo|Room 2|220000|25000
+NG|Lilygate|Room 1|180000|23000
+NG|Lilygate|Room 2|190000|23000
+NG|Eko Gardens|Classic|200000|0
+NG|Eko Gardens|Superior|220000|0
+NG|Eko Hotel Main Building|Room 1|270000|35000
+NG|Eko Hotel Main Building|Room 2|290000|35000
+NG|Eko Hotel Main Building|Room 3|350000|35000
+NG|24/7 Luxury|Room 1|70000|0
+NG|Apt Victoria Island|3 bedrooms|400000|0
+NG|Apt Lekki|2 bedrooms (190k)|190000|0
+NG|Apt Lekki|2 bedrooms (200k)|200000|0
+NG|Apt Large Lekki|4 bedrooms (set rate 500-600k)|500000|0
+NG|Apt Preston Court Estate|2 rooms|250000|0
+NG|Apt Adedoye|Rate TBC (caution deposit ₦100,000 is refundable)|0|0`;
+const VS=`N|Ikeja→Benin 15-seater one-way (per trip)|500000
+N|Ikeja→Benin 15-seater return (per trip)|1000000
+N|Ikeja→Benin 30-seater one-way (per trip)|800000
+N|Ikeja→Benin 30-seater return (per trip)|1600000
+N|Victoria Island departure supplement (per trip)|50000
+N|NG daily charter 30-seater (per day)|300000
+N|NG daily charter 15-seater (per day)|200000
+N|NG daily charter Sienna (per day)|150000
+N|Airport drop-off Sienna|250000
+N|Airport drop-off Car|180000
+N|3-day package Sienna|450000
+N|3-day package Car|350000
+N|Combined: 15-seater pick-up, drop-off + 2 nights local|650000
+F|Benin Toyota Corolla w/ driver (per day)|60000
+F|Benin Corolla Cross w/ driver (per day)|100000
+F|Benin Prado 2025 w/ driver (per day)|150000
+F|Benin Prado 2023 w/ driver (per day)|140000
+F|Benin Lexus RX 330 w/ driver (per day)|90000
+F|Benin Toyota Highlander w/ driver (per day)|85000
+F|Benin Toyota Fortuner w/ driver (per day)|150000`;
+const AS=`BJ|Ganvié (boat, tour, food incl.)|pp|20000|15000|0|0|0|Full day
+BJ|Ouidah Tour|pp|10000|10000|0|0|0|Half/full day
+BJ|Cotonou City Tour|pp|4000|4000|0|20000|0|Half day
+BJ|Porto-Novo Tour|pp|5000|5000|0|0|0|Half day
+BJ|Porto-Novo King's Visit|flat|100000|0|0|0|50000|2h
+BJ|Rivière Noire Adjarra|pp|10000|10000|0|0|0|Half day
+BJ|Possotomè|pp|20000|20000|0|0|0|Full day
+BJ|Abomey (basis TBC)|unk|70000|0|0|0|0|Full day
+BJ|Delta Park (basis TBC)|unk|5000|0|0|0|0|2h
+BJ|Moon Water Park|pp|3000|5000|0|0|0|Half day
+BJ|Agoualand|pp|15000|10000|0|0|0|Half day
+BJ|Agoualand Guide|flat|10000|0|0|0|0|
+BJ|Gogotinkpon|pp|15000|15000|0|0|0|Half day
+TG|Lomé City Tour|pp|7000|7000|0|0|0|Half day
+TG|Kpalimé|pp|10000|10000|0|0|0|Full day
+TG|Togo Guide (20-40k, agree rate)|unk|20000|0|0|0|0|
+NG|Nike Art Gallery|grp|0|0|0|30000|0|2h
+NG|Lekki Conservation Centre|pp|12000|10000|0|0|0|2h
+NG|Freedom Park|pp|4000|4000|0|0|0|2h
+NG|John Randle|pp|8000|8000|0|0|0|2h
+NG|Apapa Amusement Park|pp|15000|15000|0|0|0|3h
+NG|Landmark Upside Down House|pp|15000|15000|0|0|0|2h
+NG|Nautica Beach Resort|pp|15000|15000|0|0|0|3h`;
+const SV=`Guide Gervais (per day)|30000|day||F
+GOTA Guide full day|35000|day||F
+GOTA Guide half day|5000|day|2500|F
+Both guides combined (per day)|65000|day||F
+ECOWAS Border Protocol (per person per trip)|10000|pax||F
+Non-ECOWAS Border Protocol (per person per trip)|20000|pax||F`;
+const mkM=()=>({hotels:pz(HS).map((a,i)=>({id:'h'+i,co:a[0],name:a[1],room:a[2],rate:+a[3],bfp:+a[4],cur:a[0]=='NG'?'NGN':'FCFA'})),
+veh:pz(VS).map((a,i)=>({id:'v'+i,name:a[1],rate:+a[2],cur:a[0]=='N'?'NGN':'FCFA'})),
+acts:pz(AS).map((a,i)=>({id:'a'+i,co:a[0],name:a[1],basis:a[2],a:+a[3],ch:+a[4],inf:+a[5],grp:+a[6],cost:+a[7],dur:a[8],cur:a[0]=='NG'?'NGN':'FCFA'})),
+svc:pz(SV).map((a,i)=>({id:'s'+i,name:a[0],rate:+a[1],per:a[2],cost:a[3]===''?null:+a[3],cur:'FCFA'}))});
+const ST=['New Enquiry','Trip Draft','Itinerary Preparation','Quotation Preparation','Quotation Review','Quotation Sent','Client Accepted','Booking Pending','Booking Confirmed','Partially Paid','Fully Paid','Ready for Travel','In Progress','Trip Completed','Cancelled'];
+const defSt=()=>({co:'GOTA Voyages',par:'GOTA International Group',phone:'',email:'',addr:'',rate:2.5,rn:1000,mAg:5,mDir:10,mCorp:10,valid:14,terms:'100% payment two weeks before travel.',
+excl:'International flights, visas, personal expenses, travel insurance, items not listed in inclusions.',cond:'Valid travel documents required. Subject to hotel availability and supplier confirmation. Prices may change if exchange rates or service costs change. Cancellation and refund terms apply per supplier policy. Client-requested amendments may change the price.'});
+let S;
+function load(){try{let r=localStorage.getItem(K);if(r){let o=JSON.parse(r);if(o&&o.v==2&&Array.isArray(o.trips)){S=o;S.M=S.M||mkM();S.st={...defSt(),...S.st};return}throw 0}}catch(e){try{localStorage.setItem(K+'_corrupt',localStorage.getItem(K))}catch(x){}S=null;setTimeout(()=>alert('Stored data was unreadable; a copy was kept and a fresh database started.'),300)}
+S={v:2,trips:[],M:mkM(),st:defSt(),cur:null,view:'dash',tab:'ov'};S.trips.push(demo());save()}
+const save=()=>{try{localStorage.setItem(K,JSON.stringify(S))}catch(e){alert('Storage failed: '+e)}};
+const T=()=>S.trips.find(t=>t.id==S.cur);
+const E=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const iso=d=>new Date(d).toISOString().slice(0,10),addD=(d,n)=>iso(+new Date(d)+n*U);
+const nights=(a,b)=>Math.max(0,Math.round((new Date(b)-new Date(a))/U));
+const ages=s=>String(s||'').split(',').map(x=>x.trim()).filter(x=>x!=='').map(Number);
+function nt(){const id='t'+Date.now()+Math.floor(Math.random()*99),d=new Date(Date.now()+14*U);return{id,ref:'GV-'+new Date().getFullYear()+'-'+String(S.trips.length+1).padStart(3,'0'),title:'New trip',
+client:{name:'',contact:'',phone:'',email:'',type:'Direct Client',nat:'',lang:'English',req:'',notes:''},from:{co:'Nigeria',city:'Lagos'},to:{co:'Benin',city:'Cotonou'},crossing:'',start:iso(d),end:addD(d,3),staff:'',status:'New Enquiry',
+adults:2,kids:'',infs:'',diet:'',margin:S.st.mDir,rate:S.st.rate,cur:'Both',stays:[],trans:[],sameVeh:false,acts:[],svc:[],extra:[],disc:0,pkg:0,qstatus:'Draft',deposit:0,refDep:0,
+itin:[],costs:{},pays:[],sup:[],quotes:[],hist:[{d:new Date().toISOString(),x:'Created'}],archived:false,borderOk:false}}
+function demo(){const t=nt();Object.assign(t,{title:'Benin Discovery – 4 Days / 3 Nights',client:{...t.client,name:'Sample Group (demo)',nat:'Nigerian',type:'Direct Client'},start:addD(new Date(),21),end:addD(new Date(),24),adults:2,
+crossing:'Seme–Krake',stays:[{name:'Sofitel Cotonou Marina Hotel & Spa',room:'Enter category',hid:'',rooms:1,cin:addD(new Date(),21),cout:addD(new Date(),24),rate:0,cur:'FCFA',bfp:0,incl:2,guests:2,fin:false,bk:'Pending',ref:'',req:''}],
+trans:[{name:'Lagos–Cotonou–Lagos Lexus/Sienna transfer (enter negotiated price)',vid:'',qty:1,rate:0,cur:'FCFA',chg:false},{name:'Benin Lexus RX 330 w/ driver (per day)',vid:'v18',qty:3,rate:90000,cur:'FCFA',chg:false}],sameVeh:true,
+acts:[{aid:'a1',day:0,mode:'pp'},{aid:'a2',day:0,mode:'pp'},{aid:'a0',day:0,mode:'pp'}],svc:[{sid:'s4',qty:2}]});t.hist.push({d:new Date().toISOString(),x:'Demo trip'});t.itin=gen(t);return t}
+// ---- calc ----
+const cF=(x,cur,t)=>cur=='NGN'?x/t.rate:x;
+function pax(t){const k=ages(t.kids),i=ages(t.infs);return{a:+t.adults||0,k:k.length,i:i.length,n:(+t.adults||0)+k.length+i.length}}
+function lines(t){const L=[],P=pax(t);
+t.stays.forEach((s,i)=>{const n=nights(s.cin,s.cout);L.push({k:'h'+i,cat:'Accommodation',label:`${s.name} – ${s.room} (${s.rooms} room × ${n} nights)`,sell:cF(s.rate*s.rooms*n,s.cur,t),fin:s.fin,flag:s.rate>0?'':'Rate missing'});
+const ex=Math.max(0,s.guests-s.rooms*s.incl),q=ex*n;if(q>0&&s.bfp>0)L.push({k:'hb'+i,cat:'Breakfast',label:`${s.name}: ${ex} extra breakfast × ${n} services`,sell:cF(q*s.bfp,s.cur,t),fin:s.fin})});
+t.trans.forEach((x,i)=>{const cov=t.sameVeh&&i>0&&!x.chg;L.push({k:'t'+i,cat:'Transport',label:x.name+(x.qty>1?` × ${x.qty}`:'')+(cov?' (covered by same vehicle – not charged)':''),sell:cov?0:cF(x.rate*x.qty,x.cur,t),fin:false,flag:x.rate>0||cov?'':'Price missing'})});
+t.acts.forEach((a,i)=>{const m=S.M.acts.find(z=>z.id==a.aid);if(!m)return;let s=0,fl='';
+if(a.mode=='grp')s=m.grp;else if(a.mode=='flat')s=m.a;else if(a.mode=='unk'){s=m.a;fl='Price basis not confirmed'}else s=P.a*m.a+P.k*m.ch+P.i*m.inf;
+if(m.basis=='unk'&&!a.ok)fl='Price basis not confirmed';if(m.basis=='unk'&&a.ok)s=a.mode=='pp'?P.a*m.a+P.k*m.ch:m.a;
+L.push({k:'a'+i,cat:'Activity',label:`${m.name} [${a.mode=='grp'?'group package':a.mode=='flat'?'flat':'per person'}]`,sell:cF(s,m.cur,t),fin:false,flag:fl,mc:m.cost?cF(m.cost,m.cur,t):null})});
+t.svc.forEach((s,i)=>{const m=S.M.svc.find(z=>z.id==s.sid);if(m)L.push({k:'s'+i,cat:'Services',label:`${m.name} × ${s.qty}`,sell:m.rate*s.qty,fin:false,mc:m.cost!=null?m.cost*s.qty:null})});
+t.extra.forEach((x,i)=>L.push({k:'x'+i,cat:'Other',label:x.name,sell:cF(x.sell,x.cur||'FCFA',t),fin:!!x.fin}));return L}
+function tot(t){const L=lines(t),base=L.filter(l=>!l.fin).reduce((s,l)=>s+l.sell,0),fin=L.filter(l=>l.fin).reduce((s,l)=>s+l.sell,0),mA=base*t.margin/100;
+const sub=t.pkg>0?cF(t.pkg,'FCFA',t):base+mA+fin,pay=Math.max(0,sub-t.disc),paid=t.pays.filter(p=>p.st=='Confirmed'&&p.type!='Refund').reduce((s,p)=>s+p.f,0)-t.pays.filter(p=>p.st=='Confirmed'&&p.type=='Refund').reduce((s,p)=>s+p.f,0);
+let ec=0,ac=0,inc=false,ainc=false;L.forEach(l=>{const c=t.costs[l.k]||{},e=c.e!==undefined&&c.e!==''?+c.e:l.mc;if(e==null)inc=true;else ec+=e;if(c.a!==undefined&&c.a!=='')ac+=+c.a;else ainc=true});
+const oc=+(t.costs.ops||0);return{L,base,fin,mA,sub,pay,paid,bal:pay-paid,ec:ec+oc,ac:ac+oc,inc,ainc,ep:pay-ec-oc,ap:paid-ac-oc,flags:L.filter(l=>l.flag)}}
+const fF=x=>Math.round(x).toLocaleString('en-US')+' FCFA',fN=x=>'₦'+Math.round(x).toLocaleString('en-US');
+const fm=(f,t,r)=>{let n=f*t.rate;if(r&&S.st.rn)n=Math.round(n/S.st.rn)*S.st.rn;return t.cur=='FCFA'?fF(f):t.cur=='NGN'?fN(n):fF(f)+' / '+fN(n)};
+const fi=f=>fF(f)+' / '+fN(f*T().rate);
+const nd=t=>nights(t.start,t.end)+1;
+function warns(t){const w=[],P=pax(t),k=ages(t.kids),i=ages(t.infs);if(t.end<t.start)w.push('End date precedes start date');
+if(k.some(a=>isNaN(a)||a<2||a>17))w.push('Child ages must be 2–17');if(i.some(a=>isNaN(a)||a<0||a>1))w.push('Infant ages must be 0–1');if(P.a<0||t.adults%1)w.push('Invalid adult count');
+t.stays.forEach(s=>{if(s.cout<s.cin)w.push(s.name+': check-out before check-in');if(s.cin<t.start||s.cout>t.end)w.push(s.name+': dates outside trip dates')});
+if(t.from.co!=t.to.co&&!t.borderOk)w.push('Cross-border trip: confirm border protocol category/nationality (tick in Overview)');
+t.itin.forEach((d,n)=>{const seen={};d.items.forEach(x=>{if(seen[x.t])w.push(`Day ${n+1}: time conflict at ${x.t}`);seen[x.t]=1})});
+if(t.itin.length&&t.itin.length!=nd(t))w.push('Itinerary has '+t.itin.length+' days but trip has '+nd(t)+' – review');
+tot(t).flags.forEach(l=>w.push(l.label.slice(0,45)+': '+l.flag));if(!t.stays.length)w.push('No accommodation added');return w}
+function gen(t){const n=nd(t),cross=t.from.co!=t.to.co,D=[];const mid=Math.max(0,n-2);
+for(let d=1;d<=n;d++)D.push({title:d==1?'Arrival, pick-up and hotel check-in':d==n?'Check-out and departure':'Tours and experiences',items:[]});
+t.acts.forEach((a,j)=>{const m=S.M.acts.find(z=>z.id==a.aid);if(!m)return;let d=a.day||(n>2?2+Math.floor(j*mid/t.acts.length):1);d=Math.min(n,Math.max(1,d));
+D[d-1].items.push({t:'',x:m.name+(m.dur?` (${m.dur})`:''),n:m.name.startsWith('Ouidah')?'Temple of Pythons; Sacred Forest; Fondation Zinsou (subject to availability and opening hours); Slave Route and Door of No Return':''})});
+D.forEach((d,i)=>{const it=d.items;let tm=9;it.forEach(x=>{x.t=String(tm).padStart(2,'0')+':00';tm+=3});
+const pre=[],post=[];
+if(i==0){pre.push({t:'06:00',x:`Pick-up in ${t.from.city}`});if(cross)pre.push({t:'07:00',x:`Border protocol assistance${t.crossing?' at '+t.crossing:''}`});pre.push({t:'',x:`Transfer to ${t.to.city} (travel and border time: staff to confirm)`});post.push({t:'15:00',x:'Hotel check-in'});if(!it.length)post.push({t:'18:00',x:'Evening at leisure'})}
+else if(i==n-1){pre.push({t:'08:00',x:'Breakfast, if applicable'},{t:'10:00',x:'Hotel check-out'});post.push({t:'',x:`Return transfer to ${t.from.city}`});if(cross)post.push({t:'',x:'Border protocol assistance (as per service scope)'});post.push({t:'',x:`Drop-off in ${t.from.city}`})}
+else{pre.push({t:'08:00',x:'Breakfast'});if(!it.length)post.push({t:'',x:'Free time'});post.push({t:'',x:'Return to hotel; evening at leisure'})}
+d.items=[...pre,...it,...post]});return D}
+function hotelOn(t,date){return t.stays.find(s=>s.cin<=date&&date<s.cout)}
+// ---- ui helpers ----
+const val=p=>p.split('.').reduce((o,k)=>o?.[k],T());
+const gv=e=>e.type=='number'?Math.max(0,+e.value||0):e.type=='checkbox'?e.checked:e.value;
+function sp(p,v){let o=T(),k=p.split('.');for(let i=0;i<k.length-1;i++)o=o[k[i]];o[k.pop()]=v;if(p=='client.type'){T().margin=v.match(/Agency|Partner/)?S.st.mAg:v=='Corporate Client'?S.st.mCorp:S.st.mDir}
+if(p=='status')T().hist.push({d:new Date().toISOString(),x:'Status → '+v});save();render()}
+const I=(p,l,ty='text',x='')=>`<div><label>${l}</label><input type="${ty}" ${ty=='number'?'min="0"':''} ${ty=='checkbox'?(val(p)?'checked':''):`value="${E(val(p))}"`} ${x} onchange="sp('${p}',gv(this))"></div>`;
+const Sl=(p,l,o)=>`<div><label>${l}</label><select onchange="sp('${p}',this.value)">${o.map(x=>`<option ${x==val(p)?'selected':''}>${E(x)}</option>`).join('')}</select></div>`;
+const cf=m=>confirm(m);
+const add=(a,o)=>{T()[a].push(o);save();render()},del=(a,i)=>{if(cf('Remove this item?')){T()[a].splice(i,1);save();render()}};
+const brand=(t)=>`<div style="display:flex;justify-content:space-between;align-items:center"><div><h1>${E(S.st.co)}</h1><i style="color:#b08d1a">Expert through Experience</i><br><small>${E(S.st.par)} · ${E(S.st.phone)} · ${E(S.st.email)} · ${E(S.st.addr)}</small></div><div style="text-align:right"><b>${E(t.ref)}</b><br><small>${new Date().toLocaleDateString()}</small></div></div><hr>`;
+const fd=d=>new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+// ---- views ----
+const TABS=[['ov','Overview'],['st','Stay'],['tr','Transport & Services'],['ac','Activities'],['it','Itinerary'],['qu','Quotation'],['vo','Vouchers'],['pa','Payments'],['pf','Internal Profit'],['wa','WhatsApp']];
+function render(){const nav=$('#nav');nav.innerHTML=[['dash','Dashboard'],['trips','Trips'],['set','Settings']].map(([k,l])=>`<a class="${S.view==k||(k=='trips'&&S.view=='trip')?'on':''}" onclick="go('${k}')">${l}</a>`).join('');
+$('#sub').style.display=S.view=='trip'?'flex':'none';if(S.view=='trip')$('#sub').innerHTML=TABS.map(([k,l])=>`<a class="${S.tab==k?'on':''}" onclick="S.tab='${k}';render()">${l}</a>`).join('');
+$('#app').innerHTML=S.view=='dash'?vDash():S.view=='trips'?vTrips():S.view=='set'?vSet():vTrip();window.scrollTo(0,0)}
+const go=v=>{S.view=v;render()};
+const open_=id=>{S.cur=id;S.view='trip';S.tab='ov';render()};
+function vDash(){const A=S.trips.filter(t=>!t.archived),c=s=>A.filter(t=>s.includes(t.status)).length;let rev=0,pr=0,out=0;A.filter(t=>t.status!='Cancelled').forEach(t=>{const x=tot(t);rev+=x.pay;if(!x.inc)pr+=x.ep;out+=Math.max(0,x.bal)});
+const up=A.filter(t=>t.start>=iso(new Date())&&t.status!='Cancelled').sort((a,b)=>a.start>b.start?1:-1).slice(0,5),R=S.st.rate,f=x=>fF(x)+' / '+fN(x*R);
+const k=(l,v)=>`<div class="card"><div class="k">${l}</div><div class="v">${v}</div></div>`;
+return`<div class="grid">${k('Total trips',A.length)}${k('New enquiries',c(['New Enquiry']))}${k('Quotations in progress',c(['Quotation Preparation','Quotation Review']))}${k('Quotations sent',c(['Quotation Sent']))}${k('Pending bookings',c(['Client Accepted','Booking Pending']))}${k('Confirmed trips',c(['Booking Confirmed','Partially Paid','Fully Paid','Ready for Travel']))}</div>
+<div class="grid">${k('Outstanding client payments',f(out))}${k('Estimated revenue',f(rev))}${k('Est. internal profit (complete trips only)',f(pr))}</div>
+<div class="card"><b>Upcoming departures</b>${up.map(t=>`<p><a href="#" onclick="open_('${t.id}');return false">${E(t.ref)} · ${E(t.title)}</a> — ${fd(t.start)} <span class="tag">${t.status}</span></p>`).join('')||'<p>None.</p>'}</div>
+<div class="warn">Data is stored in this browser only (Local Storage). It is not shared between devices or staff and has no login security — use Settings → Export for backups.</div>`}
+let flt={q:'',s:'',c:''};
+function vTrips(){const L=S.trips.filter(t=>(!flt.q||(t.client.name+t.ref+t.title).toLowerCase().includes(flt.q.toLowerCase()))&&(!flt.s||t.status==flt.s)&&(!flt.c||t.to.co==flt.c));
+return`<div class="card"><div class="row"><div><label>Search client / reference</label><input value="${E(flt.q)}" onchange="flt.q=this.value;render()"></div><div><label>Status</label><select onchange="flt.s=this.value;render()"><option value="">All</option>${ST.map(s=>`<option ${s==flt.s?'selected':''}>${s}</option>`).join('')}</select></div><div><label>Country</label><select onchange="flt.c=this.value;render()"><option value="">All</option>${['Benin','Nigeria','Togo','Ghana'].map(s=>`<option ${s==flt.c?'selected':''}>${s}</option>`).join('')}</select></div><div><button class="g" onclick="newTrip()">+ New trip</button></div></div></div>
+${L.map(t=>{const x=tot(t);return`<div class="card" style="${t.archived?'opacity:.5':''}"><b>${E(t.ref)}</b> · ${E(t.title)} <span class="tag">${t.status}</span><br><small>${E(t.client.name)||'(no client)'} · ${fd(t.start)} → ${fd(t.end)} · ${E(t.to.co)}</small><div class="tot">${fm(x.pay,t,1)}</div>
+<button class="s" onclick="open_('${t.id}')">Open</button><button class="s" onclick="dup('${t.id}')">Duplicate</button><button class="s r" onclick="arch('${t.id}')">${t.archived?'Restore':'Archive / cancel'}</button></div>`}).join('')||'<div class="card">No trips found.</div>'}`}
+function newTrip(){const t=nt();S.trips.unshift(t);save();open_(t.id)}
+function dup(id){const o=S.trips.find(t=>t.id==id),t=JSON.parse(JSON.stringify(o));t.id='t'+Date.now();t.ref='GV-'+new Date().getFullYear()+'-'+String(S.trips.length+1).padStart(3,'0');t.status='Trip Draft';t.pays=[];t.quotes=[];t.sup=[];t.qstatus='Draft';t.title+=' (copy)';t.hist=[{d:new Date().toISOString(),x:'Duplicated from '+o.ref}];S.trips.unshift(t);save();render()}
+function arch(id){const t=S.trips.find(t=>t.id==id);if(cf(t.archived?'Restore trip?':'Archive and mark this trip Cancelled?')){t.archived=!t.archived;if(t.archived){t.status='Cancelled';t.hist.push({d:new Date().toISOString(),x:'Archived/Cancelled'})}save();render()}}
+function vTrip(){const t=T();if(!t)return go('trips'),'';const w=warns(t),x=tot(t),tb={ov,st:vStay,tr,ac,it:vItin,qu,vo,pa,pf,wa}[S.tab];
+return`<div class="card"><b>${E(t.ref)}</b> · ${E(t.title)} <span class="tag">${t.status}</span> <span class="tag">Quote: ${t.qstatus}</span><div class="tot">${fm(x.pay,t,1)}</div>${w.length?`<div class="warn"><b>Review needed:</b><br>${w.map(E).join('<br>')}</div>`:''}</div>${tb(t,x)}`}
+function ov(t){const P=pax(t);return`<div class="card"><h3>Client</h3><div class="row">${I('client.name','Client / group')}${I('client.contact','Contact person')}${I('client.phone','Telephone')}${I('client.email','Email')}</div><div class="row">${Sl('client.type','Client type',['Direct Client','Travel Agency','Corporate Client','Partner'])}${I('client.nat','Nationality')}${I('client.lang','Language')}${I('staff','Assigned staff')}</div>${I('client.req','Special requests')}${I('client.notes','Internal notes')}</div>
+<div class="card"><h3>Trip</h3><div class="row">${I('title','Title')}${I('from.co','Departure country')}${I('from.city','Departure city')}${I('to.co','Destination country')}${I('to.city','Destination city')}${I('crossing','Border crossing')}</div>
+<div class="row">${I('start','Start','date')}${I('end','End','date')}<div><label>Days / nights</label><input disabled value="${nd(t)} days / ${nights(t.start,t.end)} nights"></div>${Sl('status','Status',ST)}${Sl('cur','Currency display',['FCFA','NGN','Both'])}</div>
+<h3>Passengers</h3><div class="row">${I('adults','Adults','number')}${I('kids','Children ages (comma-separated)')}${I('infs','Infant ages (0–1, comma-separated)')}<div><label>Total</label><input disabled value="${P.n} (${P.a} adults, ${P.k} children, ${P.i} infants)"></div></div>${I('diet','Special needs / dietary')}
+<label><input type="checkbox" ${t.borderOk?'checked':''} onchange="sp('borderOk',this.checked)"> Border protocol category / nationality confirmed</label></div>
+<div class="card"><h3>History</h3>${t.hist.slice(-8).reverse().map(h=>`<small>${new Date(h.d).toLocaleString()} — ${E(h.x)}</small><br>`).join('')}</div>`}
+function vStay(t){const o=S.M.hotels.map(h=>`<option value="${h.id}">${E(h.co+' · '+h.name+' – '+h.room+' ('+h.rate.toLocaleString()+' '+h.cur+')')}</option>`).join('');
+return`<div class="card"><label>Add from master database</label><select id="hsel"><option value="">Select hotel / room…</option>${o}</select><button class="g" onclick="addStay()">Add stay</button><button onclick="addCustom()">Add custom hotel (e.g. negotiated rate)</button></div>`+
+t.stays.map((s,i)=>{const n=nights(s.cin,s.cout),inc=s.rooms*s.incl,ex=Math.max(0,s.guests-inc),p='stays.'+i+'.';
+return`<div class="card"><b>${E(s.name)}</b><div class="row">${I(p+'name','Hotel')}${I(p+'room','Room category')}${I(p+'rooms','Rooms','number')}${I(p+'cin','Check-in','date')}${I(p+'cout','Check-out','date')}</div>
+<div class="row">${I(p+'rate','Rate per room/night ('+s.cur+')','number')}${Sl(p+'cur','Currency',['FCFA','NGN'])}${I(p+'incl','Included breakfasts / room','number')}${I(p+'guests','Guests needing breakfast','number')}${I(p+'bfp','Extra breakfast price','number')}</div>
+<div class="row">${Sl(p+'bk','Booking status',['Pending','Requested','Confirmed','Cancelled'])}${I(p+'ref','Reservation ref')}${I(p+'req','Special requests')}<div><label><input type="checkbox" ${s.fin?'checked':''} onchange="sp('${p}fin',this.checked)"> Rate is final selling price (no margin)</label></div></div>
+<small>${n} nights (from dates). Included breakfasts ${inc}; extra per service: ${ex}. Included breakfasts are never re-charged.</small><br><button class="s r" onclick="del('stays',${i})">Remove</button></div>`}).join('')}
+function addStay(){const h=S.M.hotels.find(x=>x.id==$('#hsel').value),t=T();if(!h)return;add('stays',{name:h.name,room:h.room,hid:h.id,rooms:1,cin:t.start,cout:t.end,rate:h.rate,cur:h.cur,bfp:h.bfp,incl:0,guests:pax(t).a+pax(t).k,fin:false,bk:'Pending',ref:'',req:''})}
+function addCustom(){const t=T();add('stays',{name:'Custom hotel',room:'Room 1',hid:'',rooms:1,cin:t.start,cout:t.end,rate:0,cur:'FCFA',bfp:0,incl:0,guests:pax(t).a+pax(t).k,fin:false,bk:'Pending',ref:'',req:''})}
+function tr(t){const vo=S.M.veh.map(v=>`<option value="${v.id}">${E(v.name+' ('+v.rate.toLocaleString()+' '+v.cur+')')}</option>`).join(''),so=S.M.svc.map(v=>`<option value="${v.id}">${E(v.name+' – '+v.rate.toLocaleString())}</option>`).join('');
+return`<div class="card"><label><input type="checkbox" ${t.sameVeh?'checked':''} onchange="sp('sameVeh',this.checked)"> <b>Same Vehicle</b> — first vehicle covers all later lines (arrival, excursions, inter-city, departure). Rental does not automatically include fuel, tolls, driver lodging or permits: add those as extras.</label>
+<select id="vsel"><option value="">Select vehicle / transfer…</option>${vo}</select><button class="g" onclick="addVeh()">Add</button><button onclick="add('trans',{name:'Custom transport',vid:'',qty:1,rate:0,cur:'FCFA',chg:false})">Custom</button></div>`+
+t.trans.map((x,i)=>{const p='trans.'+i+'.';return`<div class="card"><div class="row">${I(p+'name','Service / vehicle')}${I(p+'qty','Days / trips','number')}${I(p+'rate','Rate ('+x.cur+')','number')}${Sl(p+'cur','Cur',['FCFA','NGN'])}${i>0&&t.sameVeh?`<div><label><input type="checkbox" ${x.chg?'checked':''} onchange="sp('${p}chg',this.checked)"> Charge anyway</label></div>`:''}</div><button class="s r" onclick="del('trans',${i})">Remove</button></div>`}).join('')+
+`<div class="card"><h3>Guides & border protocol</h3><select id="ssel">${so}</select><button class="g" onclick="add('svc',{sid:$('#ssel').value,qty:Math.max(1,pax(T()).n)})">Add</button><br><small>Border protocol is per person per trip — quantity is not doubled for return travel. Edit quantity as needed.</small></div>`+
+t.svc.map((s,i)=>{const m=S.M.svc.find(z=>z.id==s.sid);return`<div class="card"><div class="row"><div><b>${E(m?.name)}</b></div>${I('svc.'+i+'.qty','Quantity (days / persons)','number')}<div><button class="s r" onclick="del('svc',${i})">Remove</button></div></div></div>`}).join('')+
+`<div class="card"><h3>Extra / operational items</h3><button onclick="add('extra',{name:'Extra item',sell:0,cur:'FCFA',fin:false})">+ Add item</button></div>`+t.extra.map((x,i)=>{const p='extra.'+i+'.';return`<div class="card"><div class="row">${I(p+'name','Description')}${I(p+'sell','Selling amount','number')}${Sl(p+'cur','Cur',['FCFA','NGN'])}<div><label><input type="checkbox" ${x.fin?'checked':''} onchange="sp('${p}fin',this.checked)"> final price (no margin)</label></div></div><button class="s r" onclick="del('extra',${i})">Remove</button></div>`}).join('')}
+function addVeh(){const v=S.M.veh.find(x=>x.id==$('#vsel').value);if(v)add('trans',{name:v.name,vid:v.id,qty:1,rate:v.rate,cur:v.cur,chg:false})}
+function ac(t){const P=pax(t),o=S.M.acts.map(a=>`<option value="${a.id}">${E(a.co+' · '+a.name)}</option>`).join('');
+return`<div class="card"><select id="asel">${o}</select><button class="g" onclick="add('acts',{aid:$('#asel').value,day:0,mode:S.M.acts.find(z=>z.id==$('#asel').value).basis=='flat'?'flat':S.M.acts.find(z=>z.id==$('#asel').value).basis=='grp'?'grp':'pp'})">Add activity</button><br><small>Passengers: ${P.a} adults, ${P.k} children, ${P.i} infants. Prices update automatically.</small></div>`+
+t.acts.map((a,i)=>{const m=S.M.acts.find(z=>z.id==a.aid),l=tot(t).L.find(z=>z.k=='a'+i);return`<div class="card"><b>${E(m.name)}</b> <small>(${m.cur})</small><div class="row"><div><label>Pricing</label><select onchange="sp('acts.${i}.mode',this.value)">${[['pp','Per person'],['grp','Fixed group package'],['flat','Flat charge']].map(([v,n])=>`<option value="${v}" ${a.mode==v?'selected':''}>${n}</option>`).join('')}</select></div>${I('acts.'+i+'.day','Itinerary day (0 = auto)','number')}${m.basis=='unk'?`<div><label><input type="checkbox" ${a.ok?'checked':''} onchange="sp('acts.${i}.ok',this.checked)"> Basis confirmed</label></div>`:''}</div>
+<small>Adult ${m.a} · Child ${m.ch} · Infant ${m.inf} · Group ${m.grp}${m.dur?' · '+m.dur:''} → <b>${fi(l?.sell||0)}</b>${l?.flag?` ⚠ ${l.flag}`:''}</small><br><button class="s r" onclick="del('acts',${i})">Remove</button></div>`}).join('')}
+function vItin(t){const mv=(d,i,j)=>`mvI(${d},${i},${j})`;
+return`<div class="card"><button class="g" onclick="regen()">Auto-generate from trip data</button><button onclick="T().itin.push({title:'New day',items:[]});save();render()">+ Add day</button><br><small>Draft only — staff must review. Travel and border times are not verified; enter them manually.</small></div>`+
+t.itin.map((d,di)=>{const h=hotelOn(t,addD(t.start,di));return`<div class="card"><div class="row"><div><b>Day ${di+1} · ${fd(addD(t.start,di))}</b></div>${I('itin.'+di+'.title','Title')}<div><button class="s r" onclick="if(cf('Remove day?')){T().itin.splice(${di},1);save();render()}">Remove day</button></div></div>
+${d.items.map((x,i)=>`<div class="row" style="border-top:1px solid #eee"><div style="max-width:90px">${I(`itin.${di}.items.${i}.t`,'Time','time')}</div>${I(`itin.${di}.items.${i}.x`,'Activity / description')}${I(`itin.${di}.items.${i}.n`,'Notes')}<div style="flex:0 0 auto"><button class="s" onclick="${mv(di,i,-1)}">↑</button><button class="s" onclick="${mv(di,i,1)}">↓</button><select style="width:70px" onchange="mvD(${di},${i},+this.value)">${t.itin.map((_,k)=>`<option value="${k}" ${k==di?'selected':''}>D${k+1}</option>`).join('')}</select><button class="s r" onclick="T().itin[${di}].items.splice(${i},1);save();render()">✕</button></div></div>`).join('')}
+<button class="s" onclick="T().itin[${di}].items.push({t:'',x:'New item',n:''});save();render()">+ Item</button><br><small>Overnight: ${h?E(h.name):'— none recorded'}</small></div>`}).join('')||'<div class="card">No itinerary yet — generate one.</div>'}
+function mvI(d,i,k){const a=T().itin[d].items,j=i+k;if(j<0||j>=a.length)return;[a[i],a[j]]=[a[j],a[i]];save();render()}
+function mvD(d,i,n){const T_=T(),x=T_.itin[d].items.splice(i,1)[0];T_.itin[n].items.push(x);save();render()}
+function regen(){const t=T();if(t.itin.length&&!cf('Replace the current itinerary with a new draft? Manual edits will be lost.'))return;t.itin=gen(t);save();render()}
+function quoteBody(t,x,mode){const sc=1+t.margin/100,fx=t.pkg>0;let rows='';
+if(mode=='itemized'&&!fx){let sum=0;x.L.forEach(l=>{const p=l.fin?l.sell:l.sell*sc;sum+=p;rows+=`<tr><td>${E(l.cat)}</td><td>${E(l.label)}</td><td style="text-align:right">${fm(p,t)}</td></tr>`});if(t.disc)rows+=`<tr><td colspan=2>Discount</td><td style="text-align:right">−${fm(t.disc,t)}</td></tr>`;const adj=x.pay-(sum-t.disc);if(Math.abs(adj)>1)rows+=`<tr><td colspan=2>Rounding adjustment</td><td style="text-align:right">${fm(adj,t)}</td></tr>`;rows=`<table><tr><th>Type</th><th>Description</th><th style="text-align:right">Price</th></tr>${rows}</table>`}
+else if(mode!='noprice')rows=`<p>Package price (all inclusions below)${t.disc?` after discount of ${fm(t.disc,t)}`:''}</p>`;
+return`<h2>${E(t.title)}</h2><p><b>Client:</b> ${E(t.client.name)} · <b>Destination:</b> ${E(t.to.city)}, ${E(t.to.co)} · <b>Dates:</b> ${fd(t.start)} – ${fd(t.end)} (${nd(t)} days / ${nights(t.start,t.end)} nights) · <b>Passengers:</b> ${pax(t).n} (${pax(t).a} adults, ${pax(t).k} children, ${pax(t).i} infants)</p>
+<h3>Inclusions</h3><ul>${t.stays.map(s=>`<li>Accommodation: ${E(s.name)} – ${E(s.room)}, ${s.rooms} room(s), ${nights(s.cin,s.cout)} nights${s.incl?`, ${s.incl} breakfast(s) per room included`:''}</li>`).join('')}${t.trans.map(s=>`<li>Transport: ${E(s.name)}</li>`).join('')}${t.acts.map(a=>`<li>${E(S.M.acts.find(z=>z.id==a.aid)?.name)}</li>`).join('')}${t.svc.map(a=>`<li>${E(S.M.svc.find(z=>z.id==a.sid)?.name)}</li>`).join('')}</ul>
+<h3>Exclusions</h3><p>${E(S.st.excl)}</p>${rows}${mode!='noprice'?`<p style="font-size:22px"><b style="color:#b08d1a">Total: ${fm(x.pay,t,1)}</b></p>`:''}
+<p><b>Payment terms:</b> ${E(t.terms||S.st.terms)}<br><b>Validity:</b> ${S.st.valid} days from issue. <b>Exchange rate:</b> 1,000 FCFA = ₦${(t.rate*1000).toLocaleString()}.<br><small>${E(S.st.cond)}</small></p>`}
+function qu(t,x){const m=t.qmode||'package';return`<div class="card np"><div class="row">${Sl('qmode','Quotation type',['package','itemized','noprice']).replace('<select','<select title="package / itemized / noprice"')}${Sl('qstatus','Quotation status',['Draft','Ready for review','Sent to client','Accepted','Rejected','Expired','Revised','Cancelled'])}${I('margin','GOTA margin % (stored on trip)','number','step="0.5" max="100"')}<div><label>Slider</label><input type="range" min="0" max="40" step="0.5" value="${t.margin}" onchange="sp('margin',+this.value)"></div></div>
+<div class="row">${I('pkg','Manual final package price in FCFA (0 = cost-plus-margin)','number')}${I('disc','Approved discount (FCFA)','number')}${I('rate','Exchange rate: NGN per 1 FCFA','number','step="0.01"')}${I('terms','Payment terms for this trip')}</div>
+<div class="warn">Method: <b>${t.pkg>0?'Manually approved final package price (no margin applied)':'Base cost + margin ('+t.margin+'%); lines marked final price get no margin'}</b></div>
+<button onclick="t_=T();t_.rate=S.st.rate;save();render()" class="s">Use current global rate (${S.st.rate})</button> <button class="g" onclick="issue()">Issue quotation snapshot</button> <button onclick="window.print()">Print / Save as PDF</button> <small>(browser print — not a generated PDF file)</small></div>
+<div class="doc">${brand(t)}${quoteBody(t,x,m)}</div>
+<div class="card np"><b>Issued quotations</b><br>${t.quotes.map(q=>`Rev ${q.rev} · ${new Date(q.d).toLocaleString()} · ${fm(q.pay,t,1)} ${q.pay!=x.pay?'<span class="tag">outdated – current differs</span>':'<span class="tag">current</span>'}<br>`).join('')||'None. Issuing preserves a snapshot; later changes create a new revision rather than overwriting.'}</div>`}
+function issue(){const t=T(),x=tot(t);t.quotes.push({rev:t.quotes.length+1,d:new Date().toISOString(),pay:x.pay,rate:t.rate,margin:t.margin});t.qstatus=t.quotes.length>1?'Revised':'Sent to client';t.hist.push({d:new Date().toISOString(),x:'Quotation rev '+t.quotes.length+' issued'});save();render()}
+function vo(t){const gc=[t.client.name].filter(Boolean).join();return`<div class="card np"><button onclick="window.print()">Print all vouchers</button> <small>Client-safe: no costs or margins.</small></div>`+(t.stays.map(s=>`<div class="doc">${brand(t)}<h2>Hotel Booking Voucher — <span style="color:${s.bk=='Confirmed'?'green':'#b08d1a'}">${s.bk.toUpperCase()}</span></h2><table><tr><td>Hotel</td><td><b>${E(s.name)}</b></td></tr><tr><td>Reference</td><td>${E(s.ref)||'— (not yet assigned)'}</td></tr><tr><td>Guest(s)</td><td>${E(gc)}</td></tr><tr><td>Check-in / out</td><td>${fd(s.cin)} → ${fd(s.cout)} (${nights(s.cin,s.cout)} nights)</td></tr><tr><td>Rooms</td><td>${s.rooms} × ${E(s.room)}</td></tr><tr><td>Occupancy</td><td>${pax(t).a} adults, ${pax(t).k} children, ${pax(t).i} infants</td></tr><tr><td>Breakfast</td><td>${s.incl} per room included${s.guests>s.rooms*s.incl?`; ${s.guests-s.rooms*s.incl} extra to be arranged`:''}</td></tr><tr><td>Special requests</td><td>${E(s.req||t.client.req)}</td></tr><tr><td>Trip contact</td><td>${E(S.st.phone)}</td></tr></table>${s.bk!='Confirmed'?'<p><i>This reservation is not yet confirmed.</i></p>':''}</div>`).join('')||'<div class="card">Add accommodation first.</div>')}
+function pa(t,x){return`<div class="card"><div class="row"><div><label>Final amount payable</label><div class="v">${fi(x.pay)}</div></div><div><label>Confirmed received</label><div class="v">${fi(x.paid)}</div></div><div><label>Outstanding</label><div class="tot">${fi(x.bal)}</div></div><div><label>Status</label><div class="v">${x.paid<=0?'Unpaid':x.bal>1?'Partially paid':x.bal<-1?'Overpaid':'Fully paid'}</div></div></div>
+<div class="row">${I('deposit','Deposit required (FCFA)','number')}${I('refDep','Refundable deposit held (FCFA, not an expense)','number')}</div></div>
+<div class="card"><h3>Record payment</h3><div class="row"><div><label>Date</label><input type="date" id="pd" value="${iso(new Date())}"></div><div><label>Amount</label><input type="number" min="0" id="pm"></div><div><label>Currency</label><select id="pc"><option>FCFA</option><option>NGN</option></select></div><div><label>Type</label><select id="pt"><option>Deposit</option><option>Partial</option><option>Final</option><option>Refund</option></select></div><div><label>Method</label><input id="pe" placeholder="Cash / Transfer"></div><div><label>Reference</label><input id="pr"></div><div><label>Status</label><select id="ps"><option>Confirmed</option><option>Pending</option></select></div></div><button class="g" onclick="addPay()">Save payment</button></div>
+${t.pays.map((p,i)=>`<div class="card"><b>${fd(p.d)}</b> · ${p.type} · ${p.amt.toLocaleString()} ${p.cur} (${fi(p.f)}) · ${E(p.m)} ${E(p.r)} <span class="tag">${p.st}</span> <button class="s" onclick="T().pays[${i}].st='Confirmed';save();render()">Mark confirmed</button><button class="s r" onclick="del('pays',${i})">Delete</button></div>`).join('')}
+<div class="warn">Reminders are shown here only; nothing is sent automatically — use the WhatsApp tab. Payment-schedule suggestions: ${x.pay?`100% (${fi(x.pay)}) two weeks before travel, or 75% (${fi(x.pay*.75)}) three weeks + 25% two weeks before.`:''}</div>`}
+function addPay(){const t=T(),a=+$('#pm').value;if(!(a>0))return alert('Enter a valid amount');const c=$('#pc').value;t.pays.push({d:$('#pd').value,amt:a,cur:c,f:cF(a,c,t),type:$('#pt').value,m:$('#pe').value,r:$('#pr').value,st:$('#ps').value});save();render()}
+function pf(t,x){return`<div class="card np"><button onclick="window.print()">Print</button> <b>INTERNAL ONLY</b></div><div class="doc"><h2>Internal profit — ${E(t.ref)}</h2>${x.inc?'<div class="err">Incomplete: some estimated costs are missing. Profit below is NOT final.</div>':''}
+<table><tr><th>Item</th><th>Selling</th><th>Est. cost</th><th>Actual cost</th></tr>${x.L.map(l=>{const c=t.costs[l.k]||{};return`<tr><td>${E(l.label)}</td><td>${fi(l.sell)}</td><td><input type="number" min="0" style="width:100px" placeholder="${l.mc??'?'}" value="${c.e??''}" onchange="cs('${l.k}','e',this.value)"></td><td><input type="number" min="0" style="width:100px" value="${c.a??''}" onchange="cs('${l.k}','a',this.value)"></td></tr>`}).join('')}
+<tr><td>Operational / other expenses</td><td></td><td colspan=2><input type="number" min="0" value="${t.costs.ops||''}" onchange="T().costs.ops=+this.value;save();render()"></td></tr></table>
+<p>Base (before margin): ${fi(x.base+x.fin)}<br>Margin ${t.margin}%: ${fi(x.mA)}<br>Price before discount: ${fi(x.sub)}<br>Discount: ${fi(t.disc)}<br><b>Final payable: ${fi(x.pay)}</b><br>Estimated costs: ${fi(x.ec)}<br><b>Estimated net profit: ${x.inc?'INCOMPLETE':fi(x.ep)}</b><br>Actual costs: ${fi(x.ac)}<br><b>Actual net profit (payments received − actual costs): ${x.ainc?'INCOMPLETE (enter all actual costs)':fi(x.ap)}</b><br>Received: ${fi(x.paid)} · Outstanding: ${fi(x.bal)}<br>Refundable deposit held (excluded from costs): ${fi(t.refDep)}</p></div>`}
+function cs(k,f,v){const t=T();t.costs[k]=t.costs[k]||{};t.costs[k][f]=v===''?'':Math.max(0,+v);save();render()}
+function wa(t,x){const k=t.waK||'Initial Package Proposal',m=msg(t,x,k);return`<div class="card">${Sl('waK','Message type',['Initial Package Proposal','Itinerary-only','Payment Reminder','Booking Confirmation'])}<pre id="wt">${E(m)}</pre><button class="g" onclick="navigator.clipboard.writeText($('#wt').textContent).then(()=>alert('Copied'))">Copy message</button><button onclick="window.open('https://wa.me/?text='+encodeURIComponent($('#wt').textContent))">Open WhatsApp</button><br><small>Nothing is sent automatically.</small></div>`}
+function msg(t,x,k){const d=`🌍 *GOTA Voyages* – Expert through Experience\n*${t.title}*\n📅 ${fd(t.start)} – ${fd(t.end)} (${nd(t)}D/${nights(t.start,t.end)}N)\n👥 ${pax(t).n} pax\n`;
+const it=t.itin.map((y,i)=>`*Day ${i+1}: ${y.title}*\n`+y.items.map(z=>`• ${z.t?z.t+' ':''}${z.x}`).join('\n')+(hotelOn(t,addD(t.start,i))?`\n🏨 ${hotelOn(t,addD(t.start,i)).name}`:'')).join('\n\n');
+if(k=='Itinerary-only')return d+'\n'+it;
+if(k=='Payment Reminder')return`Hello ${t.client.name} 👋\nReminder for trip ${t.ref}:\nAmount payable: ${fm(x.pay,t,1)}\nReceived: ${fm(x.paid,t)}\nBalance: ${fm(x.bal,t,1)}\nDeadline: ${t.terms||S.st.terms}\nThank you! 🙏`;
+if(k=='Booking Confirmation'){const c=t.stays.filter(s=>s.bk=='Confirmed');return d+'\n✅ *Confirmed services*\n'+(c.map(s=>`🏨 ${s.name} – ${s.room} (ref ${s.ref||'n/a'})`).join('\n')||'No services confirmed yet.')}
+return d+`🏨 ${t.stays.map(s=>s.name+' – '+s.room).join(' / ')||'Hotel TBC'}\n\n`+t.itin.map((y,i)=>`Day ${i+1}: ${y.title}`).join('\n')+`\n\n💰 *Package price: ${fm(x.pay,t,1)}*\n${S.st.terms}\nValid ${S.st.valid} days.`}
+function vSet(){const s=S.st,f=(k,l,ty='text',st='')=>`<div><label>${l}</label><input type="${ty}" ${st} value="${E(s[k])}" onchange="S.st.${k}=this.type=='number'?Math.max(0,+this.value):this.value;save()"></div>`;
+return`<div class="card"><h3>Company & defaults</h3><div class="row">${f('co','Company')}${f('phone','Phone')}${f('email','Email')}${f('addr','Address')}</div><div class="row">${f('mAg','Agency/Partner margin %','number')}${f('mDir','Direct margin %','number')}${f('mCorp','Corporate margin %','number')}${f('valid','Quotation validity (days)','number')}${f('rn','NGN rounding (nearest)','number')}</div>
+<div class="row"><div><label>1,000 FCFA = ₦ …</label><input type="number" min="1" value="${s.rate*1000}" onchange="S.st.rate=Math.max(.001,+this.value/1000);save();render()"></div>${f('terms','Default payment terms')}</div><small>Global rate affects new trips only. Existing trips keep their own snapshot (update per trip in Quotation tab). Check: 1,000 FCFA → ${fN(1000*s.rate)}; ₦2,500 → ${fF(2500/s.rate)}. Default margins don't change existing trips.</small>
+<label>Exclusions</label><textarea onchange="S.st.excl=this.value;save()">${E(s.excl)}</textarea><label>Quotation conditions</label><textarea rows="4" onchange="S.st.cond=this.value;save()">${E(s.cond)}</textarea></div>
+<div class="card"><h3>Master data (JSON: hotels, vehicles, activities, guides/border)</h3><small>Edit rates, bases and classifications directly; new quotes use them, issued snapshots are unchanged.</small><textarea id="mj" rows="10" style="font-family:monospace;font-size:12px">${E(JSON.stringify(S.M,null,1))}</textarea><button class="g" onclick="saveM()">Validate & save master data</button><button class="r" onclick="if(cf('Reset master data to initial values?')){S.M=mkM();save();render()}">Reset</button></div>
+<div class="card"><h3>Backup</h3><button onclick="exp()">Export JSON backup</button> <label>Import backup (asks confirmation; current data is kept as a safety copy)</label><input type="file" accept=".json" onchange="imp(this.files[0])"></div>`}
+function saveM(){try{const m=JSON.parse($('#mj').value);if(!['hotels','veh','acts','svc'].every(k=>Array.isArray(m[k])))throw'Missing lists';S.M=m;save();alert('Saved')}catch(e){alert('Invalid JSON: '+e)}}
+async function exp(){try{const d=window.claude&&await claude.use('downloads');if(!window.claude){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(S,null,1)],{type:'application/json'}));a.download='gota-backup-'+iso(new Date())+'.json';a.click();return}if(!d)return alert('Downloads are not available in this view.');await d.save({filename:'gota-backup-'+iso(new Date())+'.json',data:JSON.stringify(S,null,1)})}catch(e){if(e&&e.code!='declined')alert('Export failed: '+(e&&e.message||e))}}
+function imp(f){if(!f)return;const r=new FileReader();r.onload=()=>{try{const o=JSON.parse(r.result);if(o.v!=2||!Array.isArray(o.trips)||!o.M||!o.st)throw'Not a valid GOTA v2 backup';if(!cf(`Replace ALL current data with ${o.trips.length} trips from this backup?`))return;try{localStorage.setItem(K+'_prev',JSON.stringify(S))}catch(e){}S=o;S.view='dash';save();render()}catch(e){alert('Import failed: '+e)}};r.readAsText(f)}
+load();render();
+</script></body></html>
